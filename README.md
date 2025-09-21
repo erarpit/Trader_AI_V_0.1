@@ -93,6 +93,64 @@ createdb trader_ai
    - Get API credentials from Angel One
    - Configure in environment variables
 
+## 🧪 Testing
+
+### Run Test Suite
+```bash
+# Install test dependencies
+pip install pytest pytest-asyncio httpx websockets
+
+# Run comprehensive test suite
+python test_trader_ai_comprehensive.py
+
+# Run specific test categories
+pytest tests/test_api.py
+pytest tests/test_services.py
+pytest tests/test_ai_models.py
+```
+
+### Test Coverage
+- **API Endpoints**: All REST endpoints tested (13 tests)
+- **WebSocket**: Real-time communication tested (1 test)
+- **AI/ML Models**: Signal generation and analysis tested (4 tests)
+- **Services**: Technical analysis, sentiment, risk management tested (4 tests)
+- **Database**: Connection and data persistence tested (1 test)
+- **Infrastructure**: Redis, PostgreSQL connectivity tested (2 tests)
+
+### Test Cases Overview
+
+#### ✅ **Working Test Cases (Expected to PASS)**
+1. **TC001 - Health Check** - Basic API health endpoint
+2. **TC002 - Root Endpoint** - Main API welcome endpoint
+3. **TC003 - Market Status** - NSE/BSE market status
+4. **TC004 - Quote Endpoint** - Live stock quotes
+5. **TC005 - Historical Data** - Historical price data
+6. **TC006 - Top Gainers** - Top gaining stocks
+7. **TC007 - Top Losers** - Top losing stocks
+8. **TC015 - AI Engine Functionality** - AI signal generation
+9. **TC016 - Technical Analysis** - Technical indicators calculation
+10. **TC017 - Sentiment Analysis** - News sentiment analysis
+11. **TC018 - Risk Management** - Portfolio risk calculation
+12. **TC019 - Database Connection** - PostgreSQL connection
+13. **TC020 - Redis Connection** - Redis cache connection
+
+#### ⚠️ **Potentially Non-Working Test Cases (Expected to FAIL/ERROR)**
+1. **TC008 - AI Analysis Endpoint** - May fail if AI service not fully implemented
+2. **TC009 - AI Signals Endpoint** - May fail if signal generation not working
+3. **TC010 - Market Overview** - May fail if market overview service not implemented
+4. **TC011 - Portfolio Endpoint** - May fail if portfolio service not implemented
+5. **TC012 - Orders Endpoint** - May fail if trading service not implemented
+6. **TC013 - Risk Portfolio** - May fail if risk service not fully implemented
+7. **TC014 - WebSocket Connection** - May fail if WebSocket not properly configured
+
+### Test Report Generation
+The test suite generates a comprehensive JSON report with:
+- Test execution summary (total, passed, failed, errors)
+- Success rate percentage
+- Detailed results for each test case
+- Error messages and debugging information
+- Timestamp and execution details
+
 ## 📊 API Endpoints
 
 ### Real-Time Data
