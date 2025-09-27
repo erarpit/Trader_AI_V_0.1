@@ -10,8 +10,19 @@ __pycache__/
 
 # API keys and secrets
 .env
+.env.local
+.env.production
+.env.aws
 .secrets
 config.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# AWS credentials
+.aws/
 
 # Large data folders
 data/
