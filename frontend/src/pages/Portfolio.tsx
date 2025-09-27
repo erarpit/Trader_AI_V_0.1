@@ -1,90 +1,100 @@
 import React, { useState, useEffect } from 'react';
 import { 
   BriefcaseIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   CurrencyDollarIcon,
   ChartBarIcon,
   EyeIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline';
+import { api, ApiError } from '../services/api';
+import { toast } from 'react-hot-toast';
+import { PortfolioResponse, PortfolioItem } from '../types/api';
 
 const Portfolio: React.FC = () => {
-  const [portfolio, setPortfolio] = useState<any[]>([]);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [totalValue, setTotalValue] = useState(0);
   const [totalPnL, setTotalPnL] = useState(0);
   const [totalPnLPercentage, setTotalPnLPercentage] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Mock portfolio data
+  // Fetch real portfolio data
   useEffect(() => {
-    const mockPortfolio = [
-      {
-        id: 1,
-        symbol: 'RELIANCE',
-        companyName: 'Reliance Industries Ltd',
-        quantity: 50,
-        averagePrice: 2400.00,
-        currentPrice: 2450.50,
-        pnl: 2525.00,
-        pnlPercentage: 2.10,
-        totalValue: 122525.00
-      },
-      {
-        id: 2,
-        symbol: 'TCS',
-        companyName: 'Tata Consultancy Services Ltd',
-        quantity: 25,
-        averagePrice: 3800.00,
-        currentPrice: 3850.25,
-        pnl: 1256.25,
-        pnlPercentage: 1.32,
-        totalValue: 96256.25
-      },
-      {
-        id: 3,
-        symbol: 'HDFC',
-        companyName: 'HDFC Bank Ltd',
-        quantity: 75,
-        averagePrice: 1600.00,
-        currentPrice: 1650.75,
-        pnl: 3806.25,
-        pnlPercentage: 3.17,
-        totalValue: 123806.25
-      },
-      {
-        id: 4,
-        symbol: 'INFY',
-        companyName: 'Infosys Ltd',
-        quantity: 100,
-        averagePrice: 1400.00,
-        currentPrice: 1450.30,
-        pnl: 5030.00,
-        pnlPercentage: 3.59,
-        totalValue: 145030.00
-      },
-      {
-        id: 5,
-        symbol: 'ITC',
-        companyName: 'ITC Ltd',
-        quantity: 200,
-        averagePrice: 420.00,
-        currentPrice: 425.60,
-        pnl: 1120.00,
-        pnlPercentage: 1.33,
-        totalValue: 85120.00
-      }
-    ];
+    const fetchPortfolioData = async () => {
+      try {
+        setLoading(true);
+        const response: PortfolioResponse = await api.getPortfolio();
+        
+        if (response.portfolio && response.portfolio.length > 0) {
+          setPortfolio(response.portfolio);
+          setTotalValue(response.total_value || 0);
+          setTotalPnL(response.total_pnl || 0);
+          
+          // Calculate PnL percentage
+          const investedValue = totalValue - totalPnL;
+          const pnlPercentage = investedValue > 0 ? (totalPnL / investedValue) * 100 : 0;
+          setTotalPnLPercentage(pnlPercentage);
+        } else {
+          // Fallback to mock data if no portfolio
+          const mockPortfolio: PortfolioItem[] = [
+            {
+              id: 1,
+              symbol: 'RELIANCE',
+              company_name: 'Reliance Industries Ltd',
+              quantity: 50,
+              average_price: 2400.00,
+              current_price: 2450.50,
+              pnl: 2525.00,
+              pnl_percentage: 2.10,
+              total_value: 122525.00,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            },
+            {
+              id: 2,
+              symbol: 'TCS',
+              company_name: 'Tata Consultancy Services Ltd',
+              quantity: 25,
+              average_price: 3800.00,
+              current_price: 3850.25,
+              pnl: 1256.25,
+              pnl_percentage: 1.32,
+              total_value: 96256.25,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            }
+          ];
+          
+          setPortfolio(mockPortfolio);
+          const total = mockPortfolio.reduce((sum, item) => sum + item.total_value, 0);
+          const pnl = mockPortfolio.reduce((sum, item) => sum + item.pnl, 0);
+          const pnlPercentage = total > 0 ? (pnl / (total - pnl)) * 100 : 0;
+          
+          setTotalValue(total);
+          setTotalPnL(pnl);
+          setTotalPnLPercentage(pnlPercentage);
+        }
 
-    setPortfolio(mockPortfolio);
-    
-    // Calculate totals
-    const total = mockPortfolio.reduce((sum, item) => sum + item.totalValue, 0);
-    const pnl = mockPortfolio.reduce((sum, item) => sum + item.pnl, 0);
-    const pnlPercentage = total > 0 ? (pnl / (total - pnl)) * 100 : 0;
-    
-    setTotalValue(total);
-    setTotalPnL(pnl);
-    setTotalPnLPercentage(pnlPercentage);
+      } catch (error) {
+        console.error('Error fetching portfolio data:', error);
+        if (error instanceof ApiError) {
+          toast.error(`API Error: ${error.message}`);
+        } else {
+          toast.error('Failed to load portfolio data');
+        }
+        
+        // Fallback to empty portfolio
+        setPortfolio([]);
+        setTotalValue(0);
+        setTotalPnL(0);
+        setTotalPnLPercentage(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPortfolioData();
   }, []);
 
   const formatCurrency = (value: number) => {
@@ -135,7 +145,7 @@ const Portfolio: React.FC = () => {
         <div className="card">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <TrendingUpIcon className="h-8 w-8 text-green-600" />
+              <ArrowTrendingUpIcon className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Total P&L</p>
@@ -220,35 +230,35 @@ const Portfolio: React.FC = () => {
                     <div className="text-sm font-medium text-gray-900">{position.symbol}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{position.companyName}</div>
+                    <div className="text-sm text-gray-900">{position.company_name || position.symbol}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{position.quantity}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatCurrency(position.averagePrice)}</div>
+                    <div className="text-sm text-gray-900">{formatCurrency(position.average_price)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatCurrency(position.currentPrice)}</div>
+                    <div className="text-sm text-gray-900">{formatCurrency(position.current_price)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex flex-col">
                       <div className={`text-sm font-medium ${position.pnl >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                         {formatCurrency(position.pnl)}
                       </div>
-                      <div className={`text-xs ${position.pnlPercentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {formatPercentage(position.pnlPercentage)}
+                      <div className={`text-xs ${position.pnl_percentage >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatPercentage(position.pnl_percentage)}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{formatCurrency(position.totalValue)}</div>
+                    <div className="text-sm text-gray-900">{formatCurrency(position.total_value)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button className="text-blue-600 hover:text-blue-900">Edit</button>
                       <button 
-                        onClick={() => handleRemovePosition(position.id)}
+                        onClick={() => position.id && handleRemovePosition(position.id)}
                         className="text-red-600 hover:text-red-900"
                       >
                         Remove

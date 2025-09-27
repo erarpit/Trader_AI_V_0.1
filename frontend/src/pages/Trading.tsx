@@ -7,8 +7,8 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer,
-  CandlestickChart,
-  Candlestick
+  AreaChart,
+  Area
 } from 'recharts';
 import { 
   MagnifyingGlassIcon,
@@ -18,53 +18,105 @@ import {
   ArrowDownIcon
 } from '@heroicons/react/24/outline';
 import { useWebSocket } from '../context/WebSocketContext';
+import { api, ApiError } from '../services/api';
+import { toast } from 'react-hot-toast';
+import { QuoteData, HistoricalDataPoint, OrderRequest } from '../types/api';
 
 const Trading: React.FC = () => {
-  const { isConnected, subscribeToSymbol, unsubscribeFromSymbol } = useWebSocket();
+  const { isConnected, subscribeToSymbol, unsubscribeFromSymbol, lastMessage } = useWebSocket();
   const [selectedSymbol, setSelectedSymbol] = useState('RELIANCE');
   const [searchQuery, setSearchQuery] = useState('');
-  const [currentPrice, setCurrentPrice] = useState(2450.50);
-  const [priceChange, setPriceChange] = useState(2.5);
-  const [chartData, setChartData] = useState<any[]>([]);
+  const [currentPrice, setCurrentPrice] = useState(0);
+  const [priceChange, setPriceChange] = useState(0);
+  const [chartData, setChartData] = useState<HistoricalDataPoint[]>([]);
   const [orderType, setOrderType] = useState<'BUY' | 'SELL'>('BUY');
   const [quantity, setQuantity] = useState(1);
   const [orderPrice, setOrderPrice] = useState(0);
   const [orderSide, setOrderSide] = useState<'MARKET' | 'LIMIT'>('MARKET');
+  const [loading, setLoading] = useState(false);
 
-  // Mock data for demonstration
+  // Fetch real data for selected symbol
   useEffect(() => {
-    // Generate mock candlestick data
-    const generateCandlestickData = () => {
-      const data = [];
-      const basePrice = 2450;
-      let currentPrice = basePrice;
+    const fetchSymbolData = async () => {
+      if (!selectedSymbol) return;
       
-      for (let i = 29; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
+      try {
+        setLoading(true);
         
-        const open = currentPrice;
-        const close = open + (Math.random() - 0.5) * 50;
-        const high = Math.max(open, close) + Math.random() * 20;
-        const low = Math.min(open, close) - Math.random() * 20;
+        // Fetch current quote
+        const quoteData: QuoteData = await api.getQuote(selectedSymbol);
+        setCurrentPrice(quoteData.last_price || 0);
+        setPriceChange(quoteData.change_percent || 0);
+        setOrderPrice(quoteData.last_price || 0);
+
+        // Fetch historical data for chart
+        const historicalData: HistoricalDataPoint[] = await api.getHistoricalData(selectedSymbol);
+        if (historicalData && historicalData.length > 0) {
+          setChartData(historicalData);
+        } else {
+          // Fallback to mock data
+          const generateCandlestickData = (): HistoricalDataPoint[] => {
+            const data: HistoricalDataPoint[] = [];
+            const basePrice = quoteData.last_price || 2450;
+            let currentPrice = basePrice;
+            
+            for (let i = 29; i >= 0; i--) {
+              const date = new Date();
+              date.setDate(date.getDate() - i);
+              
+              const open = currentPrice;
+              const close = open + (Math.random() - 0.5) * 50;
+              const high = Math.max(open, close) + Math.random() * 20;
+              const low = Math.min(open, close) - Math.random() * 20;
+              
+              data.push({
+                date: date.toISOString().split('T')[0],
+                open: open,
+                high: high,
+                low: low,
+                close: close,
+                volume: Math.floor(Math.random() * 1000000) + 100000
+              });
+              
+              currentPrice = close;
+            }
+            return data;
+          };
+          setChartData(generateCandlestickData());
+        }
+
+      } catch (error) {
+        console.error('Error fetching symbol data:', error);
+        if (error instanceof ApiError) {
+          toast.error(`API Error: ${error.message}`);
+        } else {
+          toast.error('Failed to load symbol data');
+        }
         
-        data.push({
-          date: date.toISOString().split('T')[0],
-          open: open,
-          high: high,
-          low: low,
-          close: close,
-          volume: Math.floor(Math.random() * 1000000) + 100000
-        });
-        
-        currentPrice = close;
+        // Fallback to mock data
+        setCurrentPrice(2450.50);
+        setPriceChange(2.5);
+        setOrderPrice(2450.50);
+      } finally {
+        setLoading(false);
       }
-      return data;
     };
 
-    setChartData(generateCandlestickData());
-    setOrderPrice(currentPrice);
+    fetchSymbolData();
   }, [selectedSymbol]);
+
+  // Update price from WebSocket messages
+  useEffect(() => {
+    if (lastMessage && lastMessage.type === 'price_update' && lastMessage.symbol === selectedSymbol) {
+      const newPrice = lastMessage.data.last_price;
+      if (newPrice) {
+        setCurrentPrice(newPrice);
+        if (orderSide === 'MARKET') {
+          setOrderPrice(newPrice);
+        }
+      }
+    }
+  }, [lastMessage, selectedSymbol, orderSide]);
 
   // Subscribe to symbol updates
   useEffect(() => {
@@ -87,15 +139,36 @@ const Trading: React.FC = () => {
     return `${value > 0 ? '+' : ''}${value.toFixed(2)}%`;
   };
 
-  const handlePlaceOrder = () => {
-    // Place order logic
-    console.log('Placing order:', {
-      symbol: selectedSymbol,
-      type: orderType,
-      quantity,
-      price: orderSide === 'MARKET' ? currentPrice : orderPrice,
-      side: orderSide
-    });
+  const handlePlaceOrder = async () => {
+    try {
+      setLoading(true);
+      
+      const orderData: OrderRequest = {
+        symbol: selectedSymbol,
+        order_type: orderType,
+        quantity,
+        price: orderSide === 'MARKET' ? currentPrice : orderPrice,
+        order_side: orderSide
+      };
+
+      const result = await api.placeOrder(orderData);
+      
+      toast.success(result.message || 'Order placed successfully!');
+      
+      // Reset form
+      setQuantity(1);
+      setOrderPrice(currentPrice);
+      
+    } catch (error) {
+      console.error('Error placing order:', error);
+      if (error instanceof ApiError) {
+        toast.error(`Order failed: ${error.message}`);
+      } else {
+        toast.error('Failed to place order');
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const popularStocks = [

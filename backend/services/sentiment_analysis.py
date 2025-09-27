@@ -32,6 +32,67 @@ class SentimentAnalyzer:
         except:
             pass
     
+    def analyze_sentiment(self, text: str) -> Dict:
+        """Public method to analyze sentiment of text"""
+        try:
+            sentiment_score = self._analyze_text_sentiment(text)
+            sentiment_label = self._get_sentiment_label(sentiment_score)
+            
+            return {
+                "sentiment_score": sentiment_score,
+                "sentiment_label": sentiment_label,
+                "confidence": abs(sentiment_score),
+                "timestamp": datetime.now().isoformat()
+            }
+        except Exception as e:
+            logger.error(f"Error analyzing sentiment: {e}")
+            return {
+                "sentiment_score": 0.0,
+                "sentiment_label": "NEUTRAL",
+                "confidence": 0.0,
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    async def analyze_market_sentiment(self) -> Dict:
+        """Analyze overall market sentiment"""
+        try:
+            # Get general market news
+            market_articles = await self._fetch_market_news()
+            
+            # Analyze sentiment
+            sentiment_scores = []
+            for article in market_articles:
+                sentiment = self._analyze_text_sentiment(article["content"])
+                sentiment_scores.append(sentiment)
+            
+            # Calculate overall sentiment
+            if sentiment_scores:
+                avg_sentiment = sum(sentiment_scores) / len(sentiment_scores)
+                sentiment_label = self._get_sentiment_label(avg_sentiment)
+                confidence = min(len(sentiment_scores) / 10, 1.0)  # More articles = higher confidence
+            else:
+                avg_sentiment = 0.0
+                sentiment_label = "NEUTRAL"
+                confidence = 0.0
+            
+            return {
+                "market_sentiment_score": avg_sentiment,
+                "market_sentiment_label": sentiment_label,
+                "article_count": len(sentiment_scores),
+                "confidence": confidence,
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            logger.error(f"Error analyzing market sentiment: {e}")
+            return {
+                "market_sentiment_score": 0.0,
+                "market_sentiment_label": "NEUTRAL",
+                "article_count": 0,
+                "confidence": 0.0,
+                "timestamp": datetime.now().isoformat()
+            }
+    
     async def analyze_stock_sentiment(self, symbol: str) -> Dict:
         """Analyze sentiment for a specific stock"""
         try:
@@ -159,6 +220,16 @@ class SentimentAnalyzer:
             logger.error(f"Error fetching market news: {e}")
             return []
     
+    async def _fetch_market_news(self) -> List[Dict]:
+        """Fetch general market news articles"""
+        try:
+            # For now, return mock market news
+            return self._get_mock_market_news()
+            
+        except Exception as e:
+            logger.error(f"Error fetching market news: {e}")
+            return []
+    
     def _get_mock_news_articles(self, symbol: str, query: str) -> List[Dict]:
         """Generate mock news articles for testing"""
         mock_articles = [
@@ -177,6 +248,31 @@ class SentimentAnalyzer:
             {
                 "title": f"Market Update: {symbol} Performance",
                 "content": f"The {symbol} stock continues to trade above its key resistance levels with strong volume support. Technical indicators suggest further upside potential.",
+                "source": "Business Standard",
+                "published_at": datetime.now().isoformat()
+            }
+        ]
+        
+        return mock_articles
+    
+    def _get_mock_market_news(self) -> List[Dict]:
+        """Generate mock market news articles for testing"""
+        mock_articles = [
+            {
+                "title": "Indian Stock Market Shows Strong Performance",
+                "content": "The Indian stock market continues to show strong performance with Nifty 50 gaining 1.5% in today's session. Positive global cues and strong domestic fundamentals are driving the market higher.",
+                "source": "Economic Times",
+                "published_at": datetime.now().isoformat()
+            },
+            {
+                "title": "Market Sentiment Remains Positive",
+                "content": "Market sentiment remains positive with strong institutional buying and positive earnings outlook. Analysts expect the market to continue its upward trajectory in the coming weeks.",
+                "source": "Money Control",
+                "published_at": datetime.now().isoformat()
+            },
+            {
+                "title": "FIIs Continue to Invest in Indian Markets",
+                "content": "Foreign Institutional Investors (FIIs) continue to show strong interest in Indian markets with net inflows of over $500 million this week. This is a positive sign for market stability.",
                 "source": "Business Standard",
                 "published_at": datetime.now().isoformat()
             }

@@ -1,0 +1,180 @@
+{
+  "summary": {
+    "total_tests": 21,
+    "passed": 13,
+    "failed": 0,
+    "errors": 8,
+    "success_rate": "61.90%"
+  },
+  "test_results": [
+    {
+      "test_id": "TC001",
+      "test_name": "Health Check Endpoint",
+      "status": "PASS",
+      "details": "Health check successful: {'status': 'healthy', 'message': 'Trader AI is running'}",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:37.682819"
+    },
+    {
+      "test_id": "TC002",
+      "test_name": "Root Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "Expecting value: line 1 column 1 (char 0)",
+      "timestamp": "2025-09-24T19:51:37.865626"
+    },
+    {
+      "test_id": "TC003",
+      "test_name": "Market Status Endpoint",
+      "status": "PASS",
+      "details": "Market status retrieved: NSE={'marketState': [{'market': 'Capital Market', 'marketStatus': 'Closed', 'tradeDate': '24-Sep-2025 15:30', 'index': 'NIFTY 50', 'last': 25056.9, 'variation': -112.59999999999854, 'percentChange': -0.45, 'marketStatusMessage': 'Normal Market has Closed'}, {'market': 'Currency', 'marketStatus': 'Closed', 'tradeDate': '24-Sep-2025', 'index': '', 'last': '', 'variation': '', 'percentChange': '', 'marketStatusMessage': 'Market is Closed'}, {'market': 'Commodity', 'marketStatus': 'Open', 'tradeDate': '24-Sep-2025', 'index': '', 'last': '', 'variation': '', 'percentChange': '', 'marketStatusMessage': 'Market is Open'}, {'market': 'Debt', 'marketStatus': 'Closed', 'tradeDate': '24-Sep-2025', 'index': '', 'last': '', 'variation': '', 'percentChange': '', 'marketStatusMessage': 'Market is Closed'}, {'market': 'currencyfuture', 'marketStatus': 'Closed', 'tradeDate': '24-Sep-2025', 'index': '', 'last': '88.7325', 'variation': '', 'percentChange': '', 'marketStatusMessage': 'Market is Closed', 'expiryDate': '26-Sep-2025', 'underlying': 'USDINR', 'updated_time': '24-Sep-2025 17:00', 'tradeDateFormatted': '24-Sep-2025 17:00', 'slickclass': 'slick-item'}], 'marketcap': {'timeStamp': '24-Sep-2025', 'marketCapinTRDollars': 5.15, 'marketCapinLACCRRupees': 457.22076682225025, 'marketCapinCRRupees': 45722076.68, 'marketCapinCRRupeesFormatted': '45,722,076.68', 'marketCapinLACCRRupeesFormatted': '457.22', 'underlying': 'Market Cap'}, 'indicativenifty50': {'dateTime': '24-Sep-2025 15:30', 'indicativeTime': None, 'indexName': 'NIFTY 50', 'indexLast': None, 'indexPercChange': None, 'indexTimeVal': None, 'closingValue': 25056.9, 'finalClosingValue': 25056.9, 'change': -112.6, 'perChange': -0.45, 'status': 'CLOSE'}, 'giftnifty': {'INSTRUMENTTYPE': 'FUTIDX', 'SYMBOL': 'NIFTY', 'EXPIRYDATE': '30-Sep-2025', 'OPTIONTYPE': '-', 'STRIKEPRICE': '-', 'LASTPRICE': 25106.5, 'DAYCHANGE': '-13.00', 'PERCHANGE': '           -0.05', 'CONTRACTSTRADED': 59882, 'TIMESTMP': '24-Sep-2025 19:49', 'id': '1/NIFTYFUTIDX30-Sep-2025--'}}, BSE=None",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:39.405057"
+    },
+    {
+      "test_id": "TC004",
+      "test_name": "Quote Endpoint",
+      "status": "PASS",
+      "details": "Quote for RELIANCE: {'symbol': 'RELIANCE', 'company_name': 'RELIANCE', 'last_price': 3255.0, 'change': 0.0, 'change_percent': 0.0, 'open': 3255.0, 'high': 3287.55, 'low': 3222.45, 'close': 3255.0, 'volume': 0, 'value': 0, 'market_cap': 0, 'timestamp': '2025-09-24T19:51:39.923488'}",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:39.923488"
+    },
+    {
+      "test_id": "TC004",
+      "test_name": "Quote Endpoint",
+      "status": "PASS",
+      "details": "Quote for TCS: {'symbol': 'TCS', 'company_name': 'TCS', 'last_price': 3829.0, 'change': 0.0, 'change_percent': 0.0, 'open': 3829.0, 'high': 3867.29, 'low': 3790.71, 'close': 3829.0, 'volume': 0, 'value': 0, 'market_cap': 0, 'timestamp': '2025-09-24T19:51:40.546810'}",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:40.546810"
+    },
+    {
+      "test_id": "TC005",
+      "test_name": "Historical Data Endpoint",
+      "status": "PASS",
+      "details": "Historical data for RELIANCE: 23 records",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:41.213995"
+    },
+    {
+      "test_id": "TC006",
+      "test_name": "Top Gainers Endpoint",
+      "status": "PASS",
+      "details": "Top gainers retrieved: 0 stocks",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:41.629311"
+    },
+    {
+      "test_id": "TC007",
+      "test_name": "Top Losers Endpoint",
+      "status": "PASS",
+      "details": "Top losers retrieved: 0 stocks",
+      "error": "",
+      "timestamp": "2025-09-24T19:51:42.068641"
+    },
+    {
+      "test_id": "TC008",
+      "test_name": "AI Analysis Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "",
+      "timestamp": "2025-09-24T19:52:12.080251"
+    },
+    {
+      "test_id": "TC009",
+      "test_name": "AI Signals Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "",
+      "timestamp": "2025-09-24T19:52:42.373068"
+    },
+    {
+      "test_id": "TC010",
+      "test_name": "Market Overview Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "",
+      "timestamp": "2025-09-24T19:53:12.635191"
+    },
+    {
+      "test_id": "TC011",
+      "test_name": "Portfolio Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "",
+      "timestamp": "2025-09-24T19:53:42.896872"
+    },
+    {
+      "test_id": "TC012",
+      "test_name": "Orders Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:13.252918"
+    },
+    {
+      "test_id": "TC013",
+      "test_name": "Risk Portfolio Endpoint",
+      "status": "ERROR",
+      "details": "",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:43.524787"
+    },
+    {
+      "test_id": "TC014",
+      "test_name": "WebSocket Connection",
+      "status": "ERROR",
+      "details": "",
+      "error": "timed out during opening handshake",
+      "timestamp": "2025-09-24T19:54:53.715584"
+    },
+    {
+      "test_id": "TC015",
+      "test_name": "AI Engine Functionality",
+      "status": "PASS",
+      "details": "AI engine generated signals: {'signal': 'HOLD', 'confidence': np.float64(0.8166666666666667), 'price_target': np.float64(110.0), 'stop_loss': np.float64(103.4), 'features': {'price_change_1d': np.float64(0.009174311926605505), 'price_change_5d': np.float64(0.047619047619047616), 'price_change_20d': 0, 'volume_ratio': np.float64(1.3333333333333333), 'volatility_20d': 0, 'rsi': np.float64(1.0), 'macd_diff': np.float64(0.0004545454545454549), 'sma_20_ratio': np.float64(1.0), 'sma_50_ratio': np.float64(1.0476190476190477), 'bb_position': np.float64(0.5), 'sentiment_score': 0.7, 'sentiment_confidence': 0.8, 'is_weekend': 0, 'hour_of_day': 0.7916666666666666}, 'predictions': {'buy_probability': 0.5, 'sell_probability': 0.5, 'hold_probability': 0.5}, 'timestamp': '2025-09-24T19:54:55.666873'}",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:55.666873"
+    },
+    {
+      "test_id": "TC016",
+      "test_name": "Technical Analysis Service",
+      "status": "PASS",
+      "details": "Technical analysis calculated 19 indicators",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:55.702641"
+    },
+    {
+      "test_id": "TC017",
+      "test_name": "Sentiment Analysis Service",
+      "status": "PASS",
+      "details": "Sentiment analysis result: {'sentiment_score': 0.2111111111111111, 'sentiment_label': 'POSITIVE', 'confidence': 0.2111111111111111, 'timestamp': '2025-09-24T19:54:57.275014'}",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:57.275014"
+    },
+    {
+      "test_id": "TC018",
+      "test_name": "Risk Management Service",
+      "status": "PASS",
+      "details": "Risk management calculated metrics: {'var_1d': 19805.0, 'var_5d': 14025.0, 'sharpe_ratio': 0, 'max_drawdown': np.int64(0), 'beta': 1.0, 'concentration_risk': 0.5882, 'correlation_risk': 0.3, 'total_positions': 2, 'portfolio_value': 425000}",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:57.290580"
+    },
+    {
+      "test_id": "TC019",
+      "test_name": "Database Connection",
+      "status": "PASS",
+      "details": "Database connection successful",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:57.776274"
+    },
+    {
+      "test_id": "TC020",
+      "test_name": "Redis Connection",
+      "status": "PASS",
+      "details": "Redis connection successful",
+      "error": "",
+      "timestamp": "2025-09-24T19:54:57.879473"
+    }
+  ],
+  "timestamp": "2025-09-24T19:54:57.879473"
+}

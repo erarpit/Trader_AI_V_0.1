@@ -69,8 +69,17 @@ class RiskManager:
                 return self._get_empty_risk_metrics()
             
             # Calculate individual position metrics
-            position_values = [pos["position_value"] for pos in positions]
-            weights = [pos["weight"] for pos in positions]
+            position_values = []
+            weights = []
+            
+            for pos in positions:
+                # Handle both 'position_value' and 'value' keys
+                position_value = pos.get("position_value", pos.get("value", 0))
+                position_values.append(position_value)
+                
+                # Calculate weight as percentage of total portfolio
+                weight = position_value / total_value if total_value > 0 else 0
+                weights.append(weight)
             
             # Value at Risk (VaR) calculation
             var_1d = self._calculate_var(position_values, 0.01)  # 1% VaR

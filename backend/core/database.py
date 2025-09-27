@@ -14,8 +14,23 @@ load_dotenv()
 # Database URL
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./trader_ai.db")
 
-# Create engine
-engine = create_engine(DATABASE_URL)
+# Database connection pool settings for AWS RDS
+DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "10"))
+DB_MAX_OVERFLOW = int(os.getenv("DB_MAX_OVERFLOW", "20"))
+DB_POOL_TIMEOUT = int(os.getenv("DB_POOL_TIMEOUT", "30"))
+DB_POOL_RECYCLE = int(os.getenv("DB_POOL_RECYCLE", "3600"))
+
+# Create engine with connection pooling for AWS RDS
+engine = create_engine(
+    DATABASE_URL,
+    pool_size=DB_POOL_SIZE,
+    max_overflow=DB_MAX_OVERFLOW,
+    pool_timeout=DB_POOL_TIMEOUT,
+    pool_recycle=DB_POOL_RECYCLE,
+    pool_pre_ping=True,  # Verify connections before use
+    echo=os.getenv("DEBUG", "False").lower() == "true"
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

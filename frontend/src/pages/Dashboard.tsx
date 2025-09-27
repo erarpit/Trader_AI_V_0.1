@@ -1,59 +1,103 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { 
-  TrendingUpIcon, 
-  TrendingDownIcon, 
+  ArrowTrendingUpIcon, 
+  ArrowTrendingDownIcon, 
   CurrencyDollarIcon,
   ChartBarIcon,
   EyeIcon
 } from '@heroicons/react/24/outline';
 import { useWebSocket } from '../context/WebSocketContext';
+import { api, ApiError } from '../services/api';
+import { toast } from 'react-hot-toast';
+import { PortfolioResponse, TopGainerLoser } from '../types/api';
 
 const Dashboard: React.FC = () => {
   const { isConnected, lastMessage } = useWebSocket();
   const [marketData, setMarketData] = useState<any[]>([]);
-  const [topGainers, setTopGainers] = useState<any[]>([]);
-  const [topLosers, setTopLosers] = useState<any[]>([]);
+  const [topGainers, setTopGainers] = useState<TopGainerLoser[]>([]);
+  const [topLosers, setTopLosers] = useState<TopGainerLoser[]>([]);
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [todayPnL, setTodayPnL] = useState(0);
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for demonstration
+  // Fetch real data from API
   useEffect(() => {
-    // Generate mock market data
-    const generateMockData = () => {
-      const data = [];
-      const now = new Date();
-      for (let i = 29; i >= 0; i--) {
-        const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-        data.push({
-          date: date.toISOString().split('T')[0],
-          value: 50000 + Math.random() * 10000 + i * 100,
-          volume: Math.floor(Math.random() * 1000000) + 100000
-        });
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch portfolio data
+        const portfolioResponse: PortfolioResponse = await api.getPortfolio();
+        setPortfolioValue(portfolioResponse.total_value || 0);
+        setTodayPnL(portfolioResponse.total_pnl || 0);
+
+        // Fetch top gainers and losers
+        const [gainersResponse, losersResponse] = await Promise.all([
+          api.getTopGainers(),
+          api.getTopLosers()
+        ]);
+        
+        setTopGainers(gainersResponse || []);
+        setTopLosers(losersResponse || []);
+
+        // Generate portfolio performance chart data
+        if (portfolioResponse.portfolio && portfolioResponse.portfolio.length > 0) {
+          const chartData = portfolioResponse.portfolio.map((item, index: number) => ({
+            date: new Date(Date.now() - (portfolioResponse.portfolio.length - index - 1) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            value: item.total_value || 0,
+            volume: item.quantity || 0
+          }));
+          setMarketData(chartData);
+        } else {
+          // Fallback to mock data if no portfolio data
+          const generateMockData = () => {
+            const data = [];
+            const now = new Date();
+            for (let i = 29; i >= 0; i--) {
+              const date = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
+              data.push({
+                date: date.toISOString().split('T')[0],
+                value: 50000 + Math.random() * 10000 + i * 100,
+                volume: Math.floor(Math.random() * 1000000) + 100000
+              });
+            }
+            return data;
+          };
+          setMarketData(generateMockData());
+        }
+
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        if (error instanceof ApiError) {
+          toast.error(`API Error: ${error.message}`);
+        } else {
+          toast.error('Failed to load dashboard data');
+        }
+        
+        // Fallback to mock data on error
+        setPortfolioValue(125000);
+        setTodayPnL(2500);
+        setTopGainers([
+          { symbol: 'RELIANCE', change: 2.5, price: 2450.50 },
+          { symbol: 'TCS', change: 1.8, price: 3850.25 },
+          { symbol: 'HDFC', change: 1.5, price: 1650.75 },
+          { symbol: 'INFY', change: 1.2, price: 1450.30 },
+          { symbol: 'ITC', change: 0.9, price: 425.60 }
+        ]);
+        setTopLosers([
+          { symbol: 'BHARTI', change: -2.1, price: 850.40 },
+          { symbol: 'SBI', change: -1.8, price: 520.25 },
+          { symbol: 'ONGC', change: -1.5, price: 180.75 },
+          { symbol: 'NTPC', change: -1.2, price: 165.30 },
+          { symbol: 'POWERGRID', change: -0.9, price: 225.60 }
+        ]);
+      } finally {
+        setLoading(false);
       }
-      return data;
     };
 
-    setMarketData(generateMockData());
-    setPortfolioValue(125000);
-    setTodayPnL(2500);
-
-    // Mock top gainers and losers
-    setTopGainers([
-      { symbol: 'RELIANCE', change: 2.5, price: 2450.50 },
-      { symbol: 'TCS', change: 1.8, price: 3850.25 },
-      { symbol: 'HDFC', change: 1.5, price: 1650.75 },
-      { symbol: 'INFY', change: 1.2, price: 1450.30 },
-      { symbol: 'ITC', change: 0.9, price: 425.60 }
-    ]);
-
-    setTopLosers([
-      { symbol: 'BHARTI', change: -2.1, price: 850.40 },
-      { symbol: 'SBI', change: -1.8, price: 520.25 },
-      { symbol: 'ONGC', change: -1.5, price: 180.75 },
-      { symbol: 'NTPC', change: -1.2, price: 165.30 },
-      { symbol: 'POWERGRID', change: -0.9, price: 225.60 }
-    ]);
+    fetchDashboardData();
   }, []);
 
   // Update data when WebSocket message is received
@@ -121,7 +165,7 @@ const Dashboard: React.FC = () => {
         <div className="card">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <TrendingUpIcon className="h-8 w-8 text-green-600" />
+              <ArrowTrendingUpIcon className="h-8 w-8 text-green-600" />
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Today's P&L</p>

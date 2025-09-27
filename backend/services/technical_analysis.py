@@ -45,44 +45,89 @@ class TechnicalAnalyzer:
             logger.error(f"Error in technical analysis: {e}")
             return {"error": str(e)}
     
+    def calculate_indicators(self, df: pd.DataFrame) -> Dict:
+        """Public method to calculate technical indicators"""
+        return self._calculate_indicators(df)
+    
     def _calculate_indicators(self, df: pd.DataFrame) -> Dict:
         """Calculate all technical indicators"""
         try:
             indicators = {}
+            data_length = len(df)
             
-            # Price-based indicators
-            indicators["sma_20"] = ta.trend.sma_indicator(df["close"], window=20)
-            indicators["sma_50"] = ta.trend.sma_indicator(df["close"], window=50)
-            indicators["sma_200"] = ta.trend.sma_indicator(df["close"], window=200)
-            indicators["ema_12"] = ta.trend.ema_indicator(df["close"], window=12)
-            indicators["ema_26"] = ta.trend.ema_indicator(df["close"], window=26)
+            # Price-based indicators (with data length checks)
+            if data_length >= 20:
+                indicators["sma_20"] = ta.trend.sma_indicator(df["close"], window=20)
+            if data_length >= 50:
+                indicators["sma_50"] = ta.trend.sma_indicator(df["close"], window=50)
+            if data_length >= 200:
+                indicators["sma_200"] = ta.trend.sma_indicator(df["close"], window=200)
+            if data_length >= 12:
+                indicators["ema_12"] = ta.trend.ema_indicator(df["close"], window=12)
+            if data_length >= 26:
+                indicators["ema_26"] = ta.trend.ema_indicator(df["close"], window=26)
             
             # Momentum indicators
-            indicators["rsi"] = ta.momentum.rsi(df["close"], window=14)
-            indicators["stoch"] = ta.momentum.stoch(df["high"], df["low"], df["close"])
-            indicators["williams_r"] = ta.momentum.williams_r(df["high"], df["low"], df["close"])
-            indicators["roc"] = ta.momentum.roc(df["close"], window=10)
+            if data_length >= 14:
+                indicators["rsi"] = ta.momentum.rsi(df["close"], window=14)
+            if data_length >= 14:
+                indicators["stoch"] = ta.momentum.stoch(df["high"], df["low"], df["close"])
+            if data_length >= 14:
+                indicators["williams_r"] = ta.momentum.williams_r(df["high"], df["low"], df["close"])
+            if data_length >= 10:
+                indicators["roc"] = ta.momentum.roc(df["close"], window=10)
             
-            # Trend indicators
-            indicators["macd"] = ta.trend.macd(df["close"])
-            indicators["macd_signal"] = ta.trend.macd_signal(df["close"])
-            indicators["macd_histogram"] = ta.trend.macd_diff(df["close"])
-            indicators["adx"] = ta.trend.adx(df["high"], df["low"], df["close"])
-            indicators["cci"] = ta.trend.cci(df["high"], df["low"], df["close"])
+            # Trend indicators (guard each calc)
+            if data_length >= 12:
+                try:
+                    indicators["macd"] = ta.trend.macd(df["close"])
+                    indicators["macd_signal"] = ta.trend.macd_signal(df["close"])
+                    indicators["macd_histogram"] = ta.trend.macd_diff(df["close"])
+                except Exception:
+                    pass
+            if data_length >= 14:
+                try:
+                    indicators["adx"] = ta.trend.adx(df["high"], df["low"], df["close"])
+                except Exception:
+                    pass
+                try:
+                    indicators["cci"] = ta.trend.cci(df["high"], df["low"], df["close"])
+                except Exception:
+                    pass
             
             # Volatility indicators
-            indicators["bb_upper"] = ta.volatility.bollinger_hband(df["close"])
-            indicators["bb_middle"] = ta.volatility.bollinger_mavg(df["close"])
-            indicators["bb_lower"] = ta.volatility.bollinger_lband(df["close"])
-            indicators["atr"] = ta.volatility.average_true_range(df["high"], df["low"], df["close"])
-            indicators["keltner_upper"] = ta.volatility.keltner_channel_hband(df["high"], df["low"], df["close"])
-            indicators["keltner_lower"] = ta.volatility.keltner_channel_lband(df["high"], df["low"], df["close"])
+            if data_length >= 20:
+                try:
+                    indicators["bb_upper"] = ta.volatility.bollinger_hband(df["close"])
+                    indicators["bb_middle"] = ta.volatility.bollinger_mavg(df["close"])
+                    indicators["bb_lower"] = ta.volatility.bollinger_lband(df["close"])
+                except Exception:
+                    pass
+            if data_length >= 14:
+                try:
+                    indicators["atr"] = ta.volatility.average_true_range(df["high"], df["low"], df["close"])
+                except Exception:
+                    pass
+                try:
+                    indicators["keltner_upper"] = ta.volatility.keltner_channel_hband(df["high"], df["low"], df["close"])
+                    indicators["keltner_lower"] = ta.volatility.keltner_channel_lband(df["high"], df["low"], df["close"])
+                except Exception:
+                    pass
             
             # Volume indicators
-            if "volume" in df.columns:
-                indicators["obv"] = ta.volume.on_balance_volume(df["close"], df["volume"])
-                indicators["vwap"] = ta.volume.volume_weighted_average_price(df["high"], df["low"], df["close"], df["volume"])
-                indicators["mfi"] = ta.volume.money_flow_index(df["high"], df["low"], df["close"], df["volume"])
+            if "volume" in df.columns and data_length >= 14:
+                try:
+                    indicators["obv"] = ta.volume.on_balance_volume(df["close"], df["volume"])
+                except Exception:
+                    pass
+                try:
+                    indicators["vwap"] = ta.volume.volume_weighted_average_price(df["high"], df["low"], df["close"], df["volume"])
+                except Exception:
+                    pass
+                try:
+                    indicators["mfi"] = ta.volume.money_flow_index(df["high"], df["low"], df["close"], df["volume"])
+                except Exception:
+                    pass
             
             return indicators
             

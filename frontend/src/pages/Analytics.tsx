@@ -15,8 +15,8 @@ import {
 } from 'recharts';
 import { 
   ChartBarIcon,
-  TrendingUpIcon,
-  TrendingDownIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
   CurrencyDollarIcon,
   EyeIcon,
   BellIcon

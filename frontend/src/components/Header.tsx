@@ -4,7 +4,7 @@ import {
   BellIcon, 
   MagnifyingGlassIcon,
   WifiIcon,
-  WifiSlashIcon
+  SignalSlashIcon
 } from '@heroicons/react/24/outline';
 import { useWebSocket } from '../context/WebSocketContext';
 
@@ -54,7 +54,7 @@ const Header: React.FC<HeaderProps> = ({ onMenuClick }) => {
                 </>
               ) : (
                 <>
-                  <WifiSlashIcon className="h-5 w-5 text-red-500" />
+                  <SignalSlashIcon className="h-5 w-5 text-red-500" />
                   <span className="text-sm text-red-600 font-medium">Offline</span>
                 </>
               )}

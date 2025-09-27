@@ -1,5 +1,6 @@
 # Virtual environment
 venv/
+venv310/
 .venv/
 env/
 
@@ -16,6 +17,18 @@ config.json
 data/
 dataset/
 models/ # (if you have saved model binaries)
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Node modules
+node_modules/
+
+# Build directories
+build/
+dist/
 
 # IDE
 .vscode/

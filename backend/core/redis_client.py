@@ -20,15 +20,42 @@ class RedisClient:
         self.client = None
         self.pubsub = None
         
+        # AWS ElastiCache configuration
+        self.max_connections = int(os.getenv("REDIS_MAX_CONNECTIONS", "10"))
+        self.retry_on_timeout = os.getenv("REDIS_RETRY_ON_TIMEOUT", "true").lower() == "true"
+        self.socket_keepalive = os.getenv("REDIS_SOCKET_KEEPALIVE", "true").lower() == "true"
+        self.socket_keepalive_options = os.getenv("REDIS_SOCKET_KEEPALIVE_OPTIONS", "1,3,5")
+        
     async def connect(self):
-        """Connect to Redis"""
+        """Connect to Redis with AWS ElastiCache optimizations"""
         try:
-            self.client = redis.from_url(self.redis_url, decode_responses=True)
+            # Parse keepalive options
+            keepalive_opts = [int(x) for x in self.socket_keepalive_options.split(",")]
+            
+            self.client = redis.from_url(
+                self.redis_url, 
+                decode_responses=True,
+                max_connections=self.max_connections,
+                retry_on_timeout=self.retry_on_timeout,
+                socket_keepalive=self.socket_keepalive,
+                socket_keepalive_options=keepalive_opts,
+                health_check_interval=30
+            )
             self.pubsub = self.client.pubsub()
-            logger.info("Connected to Redis")
+            logger.info("Connected to Redis with AWS ElastiCache optimizations")
         except Exception as e:
             logger.error(f"Error connecting to Redis: {e}")
             raise
+    
+    async def ping(self) -> bool:
+        """Ping Redis server to check connection"""
+        try:
+            if self.client:
+                return self.client.ping()
+            return False
+        except Exception as e:
+            logger.error(f"Error pinging Redis: {e}")
+            return False
     
     async def disconnect(self):
         """Disconnect from Redis"""

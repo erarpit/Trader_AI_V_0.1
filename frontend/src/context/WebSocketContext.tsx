@@ -19,11 +19,12 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
   const [socket, setSocket] = useState<WebSocket | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [lastMessage, setLastMessage] = useState<any>(null);
-  const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
+  // const [subscribedSymbols, setSubscribedSymbols] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const connectWebSocket = () => {
-      const ws = new WebSocket('ws://localhost:8000/ws');
+      const wsUrl = process.env.REACT_APP_WS_URL || 'ws://localhost:8000/ws';
+      const ws = new WebSocket(wsUrl);
       
       ws.onopen = () => {
         console.log('WebSocket connected');
@@ -43,6 +44,10 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
           } else if (data.type === 'trading_signal') {
             // Show trading signal notification
             toast.success(`Trading Signal: ${data.symbol} - ${data.signal}`);
+          } else if (data.type === 'subscription_confirmed') {
+            console.log(`Subscribed to ${data.symbol}`);
+          } else if (data.type === 'unsubscription_confirmed') {
+            console.log(`Unsubscribed from ${data.symbol}`);
           } else if (data.type === 'error') {
             toast.error(data.message);
           }
@@ -71,11 +76,9 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
     connectWebSocket();
 
     return () => {
-      if (socket) {
-        socket.close();
-      }
+      // Cleanup will be handled by the component unmount
     };
-  }, []);
+  }, []); // Empty dependency array to prevent infinite re-renders
 
   const sendMessage = (message: any) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
@@ -92,7 +95,7 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         symbol: symbol
       };
       socket.send(JSON.stringify(message));
-      setSubscribedSymbols(prev => new Set([...prev, symbol]));
+      // setSubscribedSymbols(prev => new Set([...prev, symbol]));
       console.log(`Subscribed to ${symbol}`);
     }
   };
@@ -104,11 +107,11 @@ export const WebSocketProvider: React.FC<WebSocketProviderProps> = ({ children }
         symbol: symbol
       };
       socket.send(JSON.stringify(message));
-      setSubscribedSymbols(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(symbol);
-        return newSet;
-      });
+      // setSubscribedSymbols(prev => {
+      //   const newSet = new Set(prev);
+      //   newSet.delete(symbol);
+      //   return newSet;
+      // });
       console.log(`Unsubscribed from ${symbol}`);
     }
   };
